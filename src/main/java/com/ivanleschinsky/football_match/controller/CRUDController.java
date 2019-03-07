@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("crud")
@@ -106,7 +105,7 @@ public class CRUDController {
     }
 
     @GetMapping("/update_group")
-    public Group updateGroup(@RequestParam(value = "group_name") String name,
+    public Group updateGroup(@RequestParam String name,
                              @RequestParam String team) {
         crudRepository.updateGroup(name, team);
         return crudRepository.getGroup(name);

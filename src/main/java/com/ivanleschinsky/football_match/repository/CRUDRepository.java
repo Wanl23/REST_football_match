@@ -5,9 +5,6 @@ import com.ivanleschinsky.football_match.domain.Game;
 import com.ivanleschinsky.football_match.domain.Group;
 import com.ivanleschinsky.football_match.domain.Team;
 import org.springframework.stereotype.Repository;
-
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +36,7 @@ public class CRUDRepository {
         Team a = getTeam(team1);
         Team b = getTeam(team2);
         if (!matchService.isTeamsInOneGroup(a, b)) {
-            throw new IllegalArgumentException("teams in differets groups");
+            throw new IllegalArgumentException("teams in different groups");
         }
         Game game = new Game(a, b, goalsA, goalsB);
         matchService.getGames().add(game);
