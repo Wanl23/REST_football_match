@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,6 +19,7 @@ public class Group {
 
     public Group(String name) {
         this.name = name;
+        this.teams = new HashSet<>();
     }
 
     public Integer getId() {
@@ -40,7 +42,7 @@ public class Group {
         this.teams = teams;
     }
 
-    public void addTeams(Team team) {
+    public void addTeam(Team team) {
         this.teams.add(team);
     }
 }

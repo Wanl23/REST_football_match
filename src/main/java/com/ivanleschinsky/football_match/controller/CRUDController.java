@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("crud")
@@ -17,6 +18,23 @@ public class CRUDController {
 
     @Autowired
     private CRUDRepository crudRepository;
+
+
+    @GetMapping("/init for tests")
+    public void generate() {
+        crudRepository.createTeam("team1");
+        crudRepository.createTeam("team2");
+        crudRepository.createTeam("team3");
+        crudRepository.createTeam("team4");
+        crudRepository.createTeam("team5");
+
+        crudRepository.createGroup("a");
+        crudRepository.createGroup("b");
+        crudRepository.createGroup("c");
+        crudRepository.createGroup("d");
+        crudRepository.createGroup("e");
+        crudRepository.createGroup("f");
+    }
 
     //Create methods
     @GetMapping("/create_team")
@@ -61,20 +79,26 @@ public class CRUDController {
     //Update methods
     @GetMapping("/update_team")
     public Team updateTeam(@RequestParam String name,
-                           @RequestParam String newName) {
-        if (crudRepository.updateTeam(name, newName)) {
-            return crudRepository.getTeam(newName);
+                           @RequestParam(required = false) String newName,
+                           @RequestParam Integer wins,
+                           @RequestParam Integer loses,
+                           @RequestParam Integer draws) {
+        Optional<String> newNameOpt = Optional.of(newName);
+        if (newNameOpt.isPresent() && !name.equals(newNameOpt.get()) && newName != "") {
+            crudRepository.updateTeam(name, newName);
+            name = newName;
         }
-        throw new IllegalArgumentException("Team name is busy");
+        crudRepository.updateTeamData(name, wins, loses, draws);
+        return crudRepository.getTeam(name);
     }
 
     @GetMapping("/update_group")
-    public Group updateGroup(@RequestParam String name,
-                             @RequestParam(required = false) String team) {
-        if (crudRepository.updateGroup(name, team)) {
-            return crudRepository.getGroup(name);
-        }
-        throw new IllegalArgumentException("group is full");
+    public Group updateGroup(@RequestParam(value = "group_name") String name,
+                             @RequestParam String team) {
+        crudRepository.updateGroup(name, team);
+        return crudRepository.getGroup(name);
+
+
     }
 
     @GetMapping("/update_game")

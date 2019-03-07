@@ -5,6 +5,7 @@ import com.ivanleschinsky.football_match.domain.Group;
 import com.ivanleschinsky.football_match.domain.Team;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MatchService {
 
@@ -25,7 +26,11 @@ public class MatchService {
     }
 
     public boolean isGroupFull(String name) {
-        return groups.size() > 3;
+        Optional<Group> group = groups.stream().filter(g -> g.getName().equals(name)).findFirst();
+        if (!group.isPresent()) {
+            throw new IllegalArgumentException("no group with this name");
+        }
+        return group.get().getTeams().size() > 3;
     }
 
     public Game getGame(Team a, Team b) {

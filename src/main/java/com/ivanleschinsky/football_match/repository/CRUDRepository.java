@@ -33,7 +33,7 @@ public class CRUDRepository {
         Team a = getTeam(team1);
         Team b = getTeam(team2);
         if (!matchService.isTeamsInOneGroup(a, b)) {
-            return;
+            throw new IllegalArgumentException("teams in differets groups");
         }
         Game game = new Game(a, b, goalsA, goalsB);
         matchService.getGames().add(game);
@@ -67,20 +67,26 @@ public class CRUDRepository {
     }
 
     //Update
-    public boolean updateTeam(String name, String newName) {
+    public void updateTeam(String name, String newName) {
         if (matchService.isTeamNameFree(newName)) {
             getTeam(name).setName(newName);
-            return true;
+            return;
         }
-        return false;
+        throw new IllegalArgumentException("team name is busy");
     }
 
-    public boolean updateGroup(String name, String newTeam) {
-        if (matchService.isGroupFull(name)) {
-            getGroup(name).addTeams(getTeam(newTeam));
-            return true;
+    public void updateTeamData(String name, Integer wins, Integer loses, Integer draws) {
+        getTeam(name).setWins(wins);
+        getTeam(name).setLosses(loses);
+        getTeam(name).setDraws(draws);
+    }
+
+    public void updateGroup(String name, String newTeam) {
+        if (!matchService.isGroupFull(name)) {
+            getGroup(name).addTeam(getTeam(newTeam));
+            return;
         }
-        return false;
+        throw new IllegalArgumentException("group is full");
     }
 
     public void updateGame(String team1, String team2, Integer goalsA, Integer goalsB) {
