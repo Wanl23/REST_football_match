@@ -19,7 +19,6 @@ public class CRUDController {
     @Autowired
     private CRUDRepository crudRepository;
 
-
     @GetMapping("/init for tests")
     public void generate() {
         crudRepository.createTeam("team1");
@@ -28,21 +27,31 @@ public class CRUDController {
         crudRepository.createTeam("team4");
         crudRepository.createTeam("team5");
 
+        crudRepository.updateTeamData("team1", 10, 2, 1);
+        crudRepository.updateTeamData("team2", 20, 2, 2);
+        crudRepository.updateTeamData("team3", 30, 2, 3);
+        crudRepository.updateTeamData("team4", 40, 2, 4);
+        crudRepository.updateTeamData("team5", 50, 2, 5);
+
         crudRepository.createGroup("a");
         crudRepository.createGroup("b");
         crudRepository.createGroup("c");
         crudRepository.createGroup("d");
         crudRepository.createGroup("e");
         crudRepository.createGroup("f");
+
+        crudRepository.updateGroup("a", "team1");
+        crudRepository.updateGroup("a", "team2");
+        crudRepository.updateGroup("a", "team3");
+        crudRepository.updateGroup("b", "team4");
+        crudRepository.updateGroup("b", "team5");
     }
 
     //Create methods
     @GetMapping("/create_team")
     public List<Team> createTeam(@RequestParam String name) {
-        if (crudRepository.createTeam(name)) {
-            return crudRepository.getTeams();
-        }
-        throw new IllegalArgumentException("Team name is busy");
+        crudRepository.createTeam(name);
+        return crudRepository.getTeams();
     }
 
     @GetMapping("/create_group")
@@ -76,6 +85,11 @@ public class CRUDController {
         return crudRepository.getGames();
     }
 
+    @GetMapping("/get_group_info")
+    public List<Group> getGroupInfo(@RequestParam String name) {
+        return crudRepository.getGroupInfo(name);
+    }
+
     //Update methods
     @GetMapping("/update_team")
     public Team updateTeam(@RequestParam String name,
@@ -83,8 +97,7 @@ public class CRUDController {
                            @RequestParam Integer wins,
                            @RequestParam Integer loses,
                            @RequestParam Integer draws) {
-        Optional<String> newNameOpt = Optional.of(newName);
-        if (newNameOpt.isPresent() && !name.equals(newNameOpt.get()) && newName != "") {
+        if (newName != null && !name.equals(newName)) {
             crudRepository.updateTeam(name, newName);
             name = newName;
         }

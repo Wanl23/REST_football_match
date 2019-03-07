@@ -6,7 +6,10 @@ import com.ivanleschinsky.football_match.domain.Group;
 import com.ivanleschinsky.football_match.domain.Team;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class CRUDRepository {
@@ -14,19 +17,22 @@ public class CRUDRepository {
     MatchService matchService = new MatchService();
 
     //Create
-    public boolean createTeam(String name) {
+    public void createTeam(String name) {
         if (matchService.isTeamNameFree(name)) {
             Team team = new Team(name);
             matchService.getTeams().add(team);
-            return true;
-        } else {
-            return false;
+            return;
         }
+        throw new IllegalArgumentException("Team name is busy");
     }
 
     public void createGroup(String name) {
-        Group group = new Group(name);
-        matchService.getGroups().add(group);
+        if (matchService.isGroupNameFree(name)) {
+            Group group = new Group(name);
+            matchService.getGroups().add(group);
+            return;
+        }
+        throw new IllegalArgumentException("Group name is busy");
     }
 
     public void createGame(String team1, String team2, int goalsA, int goalsB) {
@@ -64,6 +70,10 @@ public class CRUDRepository {
 
     public List getGames() {
         return matchService.getGames();
+    }
+
+    public List getGroupInfo(String name) {
+        return (List)getGroup(name).getTeams().stream().sorted().collect(Collectors.toList());
     }
 
     //Update
