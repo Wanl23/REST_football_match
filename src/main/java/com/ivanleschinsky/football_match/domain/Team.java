@@ -3,7 +3,7 @@ package com.ivanleschinsky.football_match.domain;
 import javax.persistence.*;
 
 @Entity
-public class Team {
+public class Team implements Comparable<Team>{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -65,6 +65,9 @@ public class Team {
     }
 
     public Integer getPoints() {
+        if (wins != null && draws != null) {
+            this.points = wins * 3 + draws;
+        } else this.points = 0;
         return points;
     }
 
@@ -72,15 +75,9 @@ public class Team {
         this.points = points;
     }
 
-    private Integer points() {
-        if (wins != null && draws != null) {
-            return wins * 3 + draws;
-        }
-        return 0;
-    }
 
-//    @Override
-//    public int compareTo(Team t) {
-//        return t.points() - this.points();
-//    }
+    @Override
+    public int compareTo(Team t) {
+        return  t.getPoints() - this.getPoints();
+    }
 }

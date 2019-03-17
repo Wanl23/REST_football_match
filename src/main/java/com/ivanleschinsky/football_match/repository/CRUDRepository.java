@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class CRUDRepository {
@@ -47,7 +50,10 @@ public class CRUDRepository {
         Team teamA = teams.stream().filter(t -> t.getName().equals(a)).findFirst().get();
         Team teamB = teams.stream().filter(t -> t.getName().equals(b)).findFirst().get();
         if (!matchService.checkIfTeamInOneGroup(teamA, teamB)) {
-            throw new IllegalArgumentException("teams is not in one team");
+            throw new IllegalArgumentException("teams is not in one group");
+        }
+        if (a.equals(b)) {
+            throw new IllegalArgumentException("you should choose different teams");
         }
         Game game = new Game(a, b);
         matchService.updateScoreData(teamA, teamB, game);
@@ -80,6 +86,15 @@ public class CRUDRepository {
         return gameRepository.findById(id).get();
     }
 
+    public List<Team> getGroupInfo(Integer id) {
+        Optional<GroupTeam> groupTeamOptional = groupTeamRepository.findById(id);
+        if(groupTeamOptional.isPresent()){
+            Set<Team> teams = groupTeamOptional.get().getGroupTeams();
+            return teams.stream().sorted().collect(Collectors.toList());
+        }
+        throw new IllegalArgumentException("There are not such group");
+    }
+
     //Update methods
     public Team updateTeam(Integer id, String name) {
         teamRepository.findById(id).get().setName(name);
@@ -94,7 +109,10 @@ public class CRUDRepository {
     public GroupTeam addTeamInGroup(Integer teamId, Integer groupId) {
         GroupTeam group = groupTeamRepository.findById(groupId).get();
         Team team = teamRepository.findById(teamId).get();
-        group.getGroupTeams().add(team);
+        if (group.getGroupTeams().size() < 4) {
+            group.getGroupTeams().add(team);
+        } else throw new IllegalArgumentException("group is full");
+
         groupTeamRepository.save(group);
         return groupTeamRepository.findById(groupId).get();
     }
