@@ -1,32 +1,49 @@
 package com.ivanleschinsky.football_match.domain;
 
+import javax.persistence.*;
+
+@Entity
 public class Game {
-    private Team a;
-    private Team b;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+    private String teamA;
+    private String teamB;
     private Integer goalsA;
     private Integer goalsB;
 
-    public Game(Team a, Team b, Integer goalsA, Integer goalsB) {
-        this.a = a;
-        this.b = b;
-        this.goalsA = goalsA;
-        this.goalsB = goalsB;
+    public Game(String teamA, String teamB) {
+        this.teamA = teamA;
+        this.teamB = teamB;
+        this.goalsA = (int)(Math.random() * 10);
+        this.goalsB = (int)(Math.random() * 10);
     }
 
-    public Team getA() {
-        return a;
+    public Game() {
     }
 
-    public void setA(Team a) {
-        this.a = a;
+    public Integer getId() {
+        return id;
     }
 
-    public Team getB() {
-        return b;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setB(Team b) {
-        this.b = b;
+    public String getTeamA() {
+        return teamA;
+    }
+
+    public void setTeamA(String teamA) {
+        this.teamA = teamA;
+    }
+
+    public String getTeamB() {
+        return teamB;
+    }
+
+    public void setTeamB(String teamB) {
+        this.teamB = teamB;
     }
 
     public Integer getGoalsA() {
@@ -45,9 +62,4 @@ public class Game {
         this.goalsB = goalsB;
     }
 
-    @Override
-    public String toString() {
-        return "Game: " + getA().getName() + " vs " + getB().getName() + " , score: " +
-                getGoalsA() + " - " + getGoalsB();
-    }
 }

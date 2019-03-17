@@ -1,12 +1,9 @@
 package com.ivanleschinsky.football_match.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
-@Entity()
-public class Team implements Comparable<Team>{
+@Entity
+public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -14,10 +11,17 @@ public class Team implements Comparable<Team>{
     private Integer wins;
     private Integer losses;
     private Integer draws;
-    private Integer poits;
+    private Integer points;
 
     public Team(String name) {
         this.name = name;
+        this.wins = 0;
+        this.losses = 0;
+        this.draws = 0;
+        this.points = 0;
+    }
+
+    public Team() {
     }
 
     public Integer getId() {
@@ -60,12 +64,12 @@ public class Team implements Comparable<Team>{
         this.draws = draws;
     }
 
-    public Integer getPoits() {
-        return poits = points();
+    public Integer getPoints() {
+        return points;
     }
 
-    public void setPoits(Integer poits) {
-        this.poits = poits;
+    public void setPoints(Integer points) {
+        this.points = points;
     }
 
     private Integer points() {
@@ -75,8 +79,8 @@ public class Team implements Comparable<Team>{
         return 0;
     }
 
-    @Override
-    public int compareTo(Team t) {
-        return t.points() - this.points();
-    }
+//    @Override
+//    public int compareTo(Team t) {
+//        return t.points() - this.points();
+//    }
 }

@@ -1,117 +1,118 @@
 package com.ivanleschinsky.football_match.repository;
 
-import com.ivanleschinsky.football_match.MatchService;
 import com.ivanleschinsky.football_match.domain.Game;
-import com.ivanleschinsky.football_match.domain.Group;
+import com.ivanleschinsky.football_match.domain.GroupTeam;
 import com.ivanleschinsky.football_match.domain.Team;
+import com.ivanleschinsky.football_match.service.MatchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class CRUDRepository {
 
-    MatchService matchService = new MatchService();
+    @Autowired
+    private TeamRepository teamRepository;
 
-    //Create
-    public void createTeam(String name) {
-        if (matchService.isTeamNameFree(name)) {
-            Team team = new Team(name);
-            matchService.getTeams().add(team);
-            return;
+    @Autowired
+    private GroupTeamRepository groupTeamRepository;
+
+    @Autowired
+    private GameRepository gameRepository;
+
+    @Autowired
+    private MatchService matchService;
+
+    //Create methods
+    public Iterable<Team> createTeam(String name) {
+        if (!matchService.checkTeamNameIfNameIsFree(name)) {
+            throw new IllegalArgumentException("Team name is busy");
         }
-        throw new IllegalArgumentException("Team name is busy");
+        teamRepository.save(new Team(name));
+        return teamRepository.findAll();
     }
 
-    public void createGroup(String name) {
-        if (matchService.isGroupNameFree(name)) {
-            Group group = new Group(name);
-            matchService.getGroups().add(group);
-            return;
+    public Iterable<GroupTeam> createGroup(String name) {
+        if (!matchService.checkIfGroupNameIfNameIsFree(name)) {
+            throw new IllegalArgumentException("Group name is busy");
         }
-        throw new IllegalArgumentException("Group name is busy");
+        groupTeamRepository.save(new GroupTeam(name));
+        return groupTeamRepository.findAll();
     }
 
-    public void createGame(String team1, String team2, int goalsA, int goalsB) {
-        Team a = getTeam(team1);
-        Team b = getTeam(team2);
-        if (!matchService.isTeamsInOneGroup(a, b)) {
-            throw new IllegalArgumentException("teams in different groups");
+    public Iterable<Game> createGame(String a, String b) {
+        List<Team> teams = new ArrayList<>();
+        teamRepository.findAll().iterator().forEachRemaining(teams::add);
+        Team teamA = teams.stream().filter(t -> t.getName().equals(a)).findFirst().get();
+        Team teamB = teams.stream().filter(t -> t.getName().equals(b)).findFirst().get();
+        if (!matchService.checkIfTeamInOneGroup(teamA, teamB)) {
+            throw new IllegalArgumentException("teams is not in one team");
         }
-        Game game = new Game(a, b, goalsA, goalsB);
-        matchService.getGames().add(game);
+        Game game = new Game(a, b);
+        matchService.updateScoreData(teamA, teamB, game);
+        gameRepository.save(game);
+        return gameRepository.findAll();
     }
 
-    public Team getTeam(String name) {
-        return matchService.getTeams().stream().filter(t -> t.getName().equals(name)).findFirst().get();
+    //Get methods
+    public Iterable<Team> getTeams() {
+        return teamRepository.findAll();
     }
 
-    public Group getGroup(String name) {
-        return matchService.getGroups().stream().filter(g -> g.getName().equals(name)).findFirst().get();
+    public Team getTeam( Integer id) {
+        return teamRepository.findById(id).get();
     }
 
-    public Game getGame(String team1, String team2) {
-        Team a = getTeam(team1);
-        Team b = getTeam(team2);
-        return matchService.getGame(a, b);
+    public Iterable<GroupTeam> getGroups() {
+        return groupTeamRepository.findAll();
     }
 
-    //Get
-    public List getTeams() {
-        return matchService.getTeams();
+    public GroupTeam getGroup(Integer id) {
+        return groupTeamRepository.findById(id).get();
     }
 
-    public List getGroups() {
-        return matchService.getGroups();
+    public Iterable<Game> getGames() {
+        return gameRepository.findAll();
     }
 
-    public List getGames() {
-        return matchService.getGames();
+    public Game getGame(Integer id) {
+        return gameRepository.findById(id).get();
     }
 
-    public List getGroupInfo(String name) {
-        return (List)getGroup(name).getTeams().stream().sorted().collect(Collectors.toList());
+    //Update methods
+    public Team updateTeam(Integer id, String name) {
+        teamRepository.findById(id).get().setName(name);
+        return teamRepository.findById(id).get();
     }
 
-    //Update
-    public void updateTeam(String name, String newName) {
-        if (matchService.isTeamNameFree(newName)) {
-            getTeam(name).setName(newName);
-            return;
-        }
-        throw new IllegalArgumentException("team name is busy");
+    public GroupTeam updateGroup(Integer id, String name) {
+        groupTeamRepository.findById(id).get().setName(name);
+        return groupTeamRepository.findById(id).get();
     }
 
-    public void updateTeamData(String name, Integer wins, Integer loses, Integer draws) {
-        getTeam(name).setWins(wins);
-        getTeam(name).setLosses(loses);
-        getTeam(name).setDraws(draws);
+    public GroupTeam addTeamInGroup(Integer teamId, Integer groupId) {
+        GroupTeam group = groupTeamRepository.findById(groupId).get();
+        Team team = teamRepository.findById(teamId).get();
+        group.getGroupTeams().add(team);
+        groupTeamRepository.save(group);
+        return groupTeamRepository.findById(groupId).get();
     }
 
-    public void updateGroup(String name, String newTeam) {
-        if (!matchService.isGroupFull(name)) {
-            getGroup(name).addTeam(getTeam(newTeam));
-            return;
-        }
-        throw new IllegalArgumentException("group is full");
+
+    //Delete methods
+    public Iterable<Team> deleteTeam(Integer id) {
+        teamRepository.deleteById(id);
+        return teamRepository.findAll();
     }
 
-    public void updateGame(String team1, String team2, Integer goalsA, Integer goalsB) {
-        Game game = getGame(team1, team2);
-        game.setGoalsA(goalsA);
-        game.setGoalsB(goalsB);
+    public Iterable<GroupTeam> deleteGroup(Integer id) {
+        groupTeamRepository.deleteById(id);
+        return groupTeamRepository.findAll();
     }
 
-    //Delete
-    public void deleteTeam(String name) {
-        getTeams().remove(getTeam(name));
-    }
-
-    public void deleteGroup(String name) {
-        getGroups().remove(getGroup(name));
-    }
-
-    public void deleteGame(String team1, String team2) {
-        getGames().remove(getGame(team1, team2));
+    public Iterable<Game> deleteGame(Integer id) {
+        gameRepository.deleteById(id);
+        return gameRepository.findAll();
     }
 }
